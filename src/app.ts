@@ -3,6 +3,7 @@ import validateEnv from './utils/validateEnvs';
 import redisClient from './utils/connectRedis';
 import cors from 'cors';
 import morgan from 'morgan';
+import { userRouter } from './routes';
 
 validateEnv();
 
@@ -12,6 +13,8 @@ app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(urlencoded({ extended: true }));
+
+app.use('/api/v1/user', userRouter);
 
 app.get('/api/healthcheck', async (req: Request, res: Response) => {
   const message = await redisClient.get('try');

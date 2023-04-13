@@ -19,6 +19,7 @@ model User {
   password  String
   verificationCode String? @db.Text
   role      RoleEnumType? @default(user)
+  lastLogin DateTime?
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 

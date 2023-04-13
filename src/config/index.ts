@@ -1,9 +1,9 @@
-import { config } from 'dotenv';
-config({ path: `.env.${process.env.NODE_ENV ?? 'development'}.local` });
+import dotenv from 'dotenv';
 
-export const CREDENTIALS = process.env.CREDENTIALS === 'true';
-export const { NODE_ENV, PORT, SECRET_KEY, LOG_FORMAT, LOG_DIR, ORIGIN } = process.env;
+dotenv.config();
 
 export const appEnvs = {
-  port: 8000,
+  port: process.env.PORT ?? 3001,
+  dbUrl: process.env.DATABASE_URL ?? '',
+  jwtSecret: process.env.JWT_SECRET ?? '',
 };
