@@ -1,14 +1,11 @@
-require('dotenv').config();
-import express, { Application, Response, Request, urlencoded } from 'express';
+import express, { type Application, type Response, type Request, urlencoded } from 'express';
 import validateEnv from './utils/validateEnvs';
-import { PrismaClient } from '@prisma/client';
 import redisClient from './utils/connectRedis';
 import cors from 'cors';
 import morgan from 'morgan';
 
 validateEnv();
 
-const prisma = new PrismaClient();
 const app: Application = express();
 
 app.use(cors());
