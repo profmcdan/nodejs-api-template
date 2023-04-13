@@ -1,0 +1,10 @@
+node_modules
+coverage
+dist
+.env
+.env.local
+.vscode
+.idea
+.pnpn
+.yarn
+yarn-error.log
