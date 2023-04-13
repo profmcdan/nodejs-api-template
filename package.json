@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon ./src/index.ts",
+    "dev": "nodemon",
     "start": "ts-node-dev --respawn --transpile-only --exit-child src/index.ts",
     "build": "tsc",
     "test": "jest",
@@ -61,5 +61,12 @@
     "morgan": "^1.10.0",
     "redis": "^4.6.5",
     "ts-node-dev": "^2.0.0"
+  },
+  "nodemonConfig": {
+    "watch": [
+      "src"
+    ],
+    "ext": "ts",
+    "exec": "ts-node src/index.ts"
   }
 }

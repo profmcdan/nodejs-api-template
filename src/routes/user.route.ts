@@ -1,23 +1,54 @@
-import { Router } from 'express';
+import { Router, type Request, type Response } from 'express';
 import { protectRoute } from '../modules/auth.module';
 import { loginValidator, registerUserValidator, updateUserValidator } from '../validators/user.validator';
-import { deleteUser, getLoggedInUser, getOneUser, getUsers, registerUser, signIn, updateUser } from '../controllers/user.controller';
+import UserController from '../controllers/user.controller';
 import { inputValidationMiddleware } from '../middleware';
 
 const userRouter = Router();
 
-userRouter.post('/login', loginValidator, inputValidationMiddleware, signIn);
+userRouter.get('/', async (_req: Request, res: Response) => {
+  const userController = new UserController();
+  const response = await userController.getUsers();
+  return res.send(response);
+});
 
-userRouter.post('/register', registerUserValidator, inputValidationMiddleware, registerUser);
+userRouter.get('/:id', protectRoute, async (req: Request, res: Response) => {
+  const userController = new UserController();
+  const response = await userController.getOneUser(req.params.id);
+  if (response.data === null) {
+    res.status(404).send({ status: 404, detail: 'User with id not found' });
+  }
+  return res.send(response);
+});
 
-userRouter.get('/me', protectRoute, getLoggedInUser);
+userRouter.put('/:id', protectRoute, updateUserValidator, inputValidationMiddleware, async (req: Request, res: Response) => {
+  const userController = new UserController();
+  const response = await userController.updateUser(req.params.id, req.body);
+  return res.send(response);
+});
 
-userRouter.get('/', getUsers);
+userRouter.delete('/:id', protectRoute, async (req: Request, res: Response) => {
+  const userController = new UserController();
+  const response = await userController.deleteUser(req.params.id);
+  return res.send(response);
+});
 
-userRouter.get('/:id', protectRoute, getOneUser);
+userRouter.get('/me', protectRoute, async (req: any, res: Response) => {
+  const userController = new UserController();
+  const response = await userController.getOneUser(req.user.id);
+  return res.send(response);
+});
 
-userRouter.put('/:id', protectRoute, updateUserValidator, inputValidationMiddleware, updateUser);
+userRouter.post('/register', protectRoute, registerUserValidator, inputValidationMiddleware, async (req: any, res: Response) => {
+  const userController = new UserController();
+  const response = await userController.registerUser(req.body);
+  return res.send(response);
+});
 
-userRouter.delete('/:id', protectRoute, deleteUser);
+userRouter.post('/login', loginValidator, inputValidationMiddleware, async (req: any, res: Response) => {
+  const userController = new UserController();
+  const response = await userController.signIn(req.body);
+  return res.send(response);
+});
 
 export default userRouter;

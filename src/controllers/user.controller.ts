@@ -1,106 +1,132 @@
 import prisma from '../config/databases';
-import { type Request, type Response } from 'express';
 import { comparePassword, createJwt, hashPassword } from '../modules/auth.module';
+import { type IHttpResponse } from '../interfaces';
+import { type ICreateUser, type ILoginUser, type IUpdateUser } from '../interfaces/user.interface';
 
-export const getUsers = async (req: Request, res: Response) => {
-  const users = await prisma.user.findMany();
-  res.send({ success: true, data: { users } });
-};
+export default class UserController {
+  public async getUsers(): Promise<IHttpResponse> {
+    const users = await prisma.user.findMany();
 
-export const getOneUser = async (req: Request, res: Response) => {
-  const user = await prisma.user.findUnique({
-    where: {
-      id: req.params.id,
-    },
-  });
-
-  res.send({ success: true, data: { user } });
-};
-
-export const updateUser = async (req: Request, res: Response) => {
-  const updated = await prisma.user.update({
-    where: {
-      id: req.params.id,
-    },
-    data: {
-      name: req.body.name,
-      photo: req.body.photo,
-    },
-  });
-  // delete updated.password;
-  res.send({ success: true, data: { user: updated } });
-};
-
-export const deleteUser = async (req: Request, res: Response) => {
-  const deleted = await prisma.user.delete({
-    where: {
-      id: req.params.id,
-    },
-  });
-
-  // delete deleted.password;
-  res.send({ success: true, data: { user: deleted } });
-};
-
-export const registerUser = async (req: Request, res: Response) => {
-  const hashedPassword = await hashPassword(req.body.password);
-  const user = await prisma.user.create({
-    data: {
-      email: req.body.email.toLowerCase().trim(),
-      name: req.body.name,
-      password: hashedPassword,
-    },
-  });
-  // const today = new Date();
-
-  // const token = await prisma.token.create({
-  //   data: {
-  //     userId: user.id,
-  //     value: generateRandomString(128),
-  //     expiry: new Date(today.setDate(new Date().getDate() + 7)),
-  //     category: 'SIGNUP',
-  //   },
-  // });
-
-  // TODO: Send email to set password.
-
-  res.status(201).json({ success: true, data: { user } });
-};
-
-export const signIn = async (req: Request, res: Response) => {
-  const user = await prisma.user.findUnique({
-    where: {
-      email: req.body.email.toLowerCase().trim(),
-    },
-  });
-
-  if (user !== null) {
-    const isValid = await comparePassword(req.body.password, user.password);
-    if (isValid) {
-      await prisma.user.update({
-        where: {
-          id: user.id,
-        },
-        data: {
-          lastLogin: new Date(),
-        },
-      });
-
-      res.send({ success: true, data: { accessToken: createJwt(user) } });
-      return;
-    }
+    return {
+      status: 200,
+      message: 'Success',
+      data: users,
+    };
   }
 
-  res.status(401).send({ success: true, detail: 'Invalid username or password' });
-};
+  public async getOneUser(id: string): Promise<IHttpResponse> {
+    const user = await prisma.user.findUnique({
+      where: {
+        id,
+      },
+    });
 
-export const getLoggedInUser = async (req: any, res: Response) => {
-  const user = await prisma.user.findUnique({
-    where: {
-      id: req.user.id,
-    },
-  });
+    return {
+      status: 200,
+      message: 'Success',
+      data: user,
+    };
+  }
 
-  // delete user.password;
-  res.send({ success: true, data: { user } });
-};
+  public async updateUser(id: string, payload: IUpdateUser): Promise<IHttpResponse> {
+    const updated = await prisma.user.update({
+      where: {
+        id,
+      },
+      data: {
+        name: payload.name,
+        photo: payload.photo,
+      },
+    });
+
+    return {
+      status: 200,
+      message: 'Success',
+      data: updated,
+    };
+  }
+
+  public async deleteUser(id: string): Promise<IHttpResponse> {
+    const deleted = await prisma.user.delete({
+      where: {
+        id,
+      },
+    });
+
+    return {
+      status: 200,
+      message: 'Success',
+      data: deleted,
+    };
+  }
+
+  public async registerUser(payload: ICreateUser): Promise<IHttpResponse> {
+    const hashedPassword = await hashPassword(payload.password);
+    const user = await prisma.user.create({
+      data: {
+        email: payload.email.toLowerCase().trim(),
+        name: payload.name,
+        password: hashedPassword,
+      },
+    });
+
+    // const today = new Date();
+
+    // const token = await prisma.token.create({
+    //   data: {
+    //     userId: user.id,
+    //     value: generateRandomString(128),
+    //     expiry: new Date(today.setDate(new Date().getDate() + 7)),
+    //     category: 'SIGNUP',
+    //   },
+    // });
+
+    // TODO: Send email to set password.
+
+    return {
+      status: 201,
+      message: 'Success',
+      data: user,
+    };
+  }
+
+  public async signIn(payload: ILoginUser): Promise<IHttpResponse> {
+    const user = await prisma.user.findUnique({
+      where: {
+        email: payload.email.toLowerCase().trim(),
+      },
+    });
+
+    if (user === null) {
+      return {
+        status: 401,
+        message: 'Invalid credentials provided',
+        data: null,
+      };
+    }
+
+    const isValid = await comparePassword(payload.password, user.password);
+    if (!isValid) {
+      return {
+        status: 401,
+        message: 'Invalid credentials provided',
+        data: null,
+      };
+    }
+
+    await prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        lastLogin: new Date(),
+      },
+    });
+
+    return {
+      status: 200,
+      message: 'Success',
+      data: { accessToken: createJwt(user) },
+    };
+  }
+}
