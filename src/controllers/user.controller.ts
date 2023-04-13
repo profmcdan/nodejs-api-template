@@ -2,8 +2,12 @@ import prisma from '../config/databases';
 import { comparePassword, createJwt, hashPassword } from '../modules/auth.module';
 import { type IHttpResponse } from '../interfaces';
 import { type ICreateUser, type ILoginUser, type IUpdateUser } from '../interfaces/user.interface';
+import { Get, Post, Put, Delete, Route, Tags, Body } from 'tsoa';
 
+@Route('api/v1/users')
+@Tags('Users')
 export default class UserController {
+  @Get('/')
   public async getUsers(): Promise<IHttpResponse> {
     const users = await prisma.user.findMany();
 
@@ -14,6 +18,7 @@ export default class UserController {
     };
   }
 
+  @Get('/:id')
   public async getOneUser(id: string): Promise<IHttpResponse> {
     const user = await prisma.user.findUnique({
       where: {
@@ -28,7 +33,8 @@ export default class UserController {
     };
   }
 
-  public async updateUser(id: string, payload: IUpdateUser): Promise<IHttpResponse> {
+  @Put('{id}')
+  public async updateUser(id: string, @Body() payload: IUpdateUser): Promise<IHttpResponse> {
     const updated = await prisma.user.update({
       where: {
         id,
@@ -46,6 +52,7 @@ export default class UserController {
     };
   }
 
+  @Delete('/{id}')
   public async deleteUser(id: string): Promise<IHttpResponse> {
     const deleted = await prisma.user.delete({
       where: {
@@ -60,7 +67,8 @@ export default class UserController {
     };
   }
 
-  public async registerUser(payload: ICreateUser): Promise<IHttpResponse> {
+  @Post('register')
+  public async registerUser(@Body() payload: ICreateUser): Promise<IHttpResponse> {
     const hashedPassword = await hashPassword(payload.password);
     const user = await prisma.user.create({
       data: {
@@ -90,7 +98,8 @@ export default class UserController {
     };
   }
 
-  public async signIn(payload: ILoginUser): Promise<IHttpResponse> {
+  @Post('login')
+  public async signIn(@Body() payload: ILoginUser): Promise<IHttpResponse> {
     const user = await prisma.user.findUnique({
       where: {
         email: payload.email.toLowerCase().trim(),

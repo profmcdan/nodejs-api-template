@@ -3,7 +3,7 @@ export type ICreateUser = {
   email: string;
   password: string;
   photo: string;
-  role?: string;
+  role?: 'admin' | 'user';
 };
 
 export type IUpdateUser = {

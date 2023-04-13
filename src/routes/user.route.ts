@@ -16,7 +16,7 @@ userRouter.get('/:id', protectRoute, async (req: Request, res: Response) => {
   const userController = new UserController();
   const response = await userController.getOneUser(req.params.id);
   if (response.data === null) {
-    res.status(404).send({ status: 404, detail: 'User with id not found' });
+    return res.status(404).json({ status: 404, detail: 'User with id not found' });
   }
   return res.send(response);
 });
@@ -39,7 +39,7 @@ userRouter.get('/me', protectRoute, async (req: any, res: Response) => {
   return res.send(response);
 });
 
-userRouter.post('/register', protectRoute, registerUserValidator, inputValidationMiddleware, async (req: any, res: Response) => {
+userRouter.post('/register', registerUserValidator, inputValidationMiddleware, async (req: any, res: Response) => {
   const userController = new UserController();
   const response = await userController.registerUser(req.body);
   return res.send(response);
