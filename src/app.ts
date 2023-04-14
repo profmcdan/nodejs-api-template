@@ -6,8 +6,20 @@ import swaggerUi from 'swagger-ui-express';
 import validateEnv from './utils/validateEnvs';
 import redisClient from './utils/connectRedis';
 import { userRouter } from './routes';
+import { emailQueue } from './queue/email.queue';
+import { createBullBoard } from '@bull-board/api';
+import { BullAdapter } from '@bull-board/api/bullAdapter';
+import { ExpressAdapter } from '@bull-board/express';
 
 validateEnv();
+
+const serverAdapter = new ExpressAdapter();
+serverAdapter.setBasePath('/admin/queues');
+
+createBullBoard({
+  queues: [new BullAdapter(emailQueue)],
+  serverAdapter,
+});
 
 const app: Application = express();
 
@@ -17,6 +29,7 @@ app.use(express.json());
 app.use(urlencoded({ extended: true }));
 app.use(express.static('public'));
 
+app.use('/admin/queues', serverAdapter.getRouter());
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(undefined, { swaggerOptions: { url: '/swagger.json' } }));
 
 app.use('/api/v1/users', userRouter);

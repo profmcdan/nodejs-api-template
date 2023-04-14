@@ -15,3 +15,11 @@ export type ILoginUser = {
   email: string;
   password: string;
 };
+
+export type IPageListQuery = {
+  page?: number;
+  limit?: number;
+  search?: string;
+  sort?: string;
+  order?: string;
+};

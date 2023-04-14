@@ -67,7 +67,25 @@
         "type": "object"
       }
     },
-    "securitySchemes": {}
+    "securitySchemes": {
+      "api_key": {
+        "type": "apiKey",
+        "name": "access_token",
+        "in": "query"
+      },
+      "tsoa_auth": {
+        "type": "oauth2",
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "http://swagger.io/api/oauth/dialog",
+            "scopes": {
+              "write:pets": "modify things",
+              "read:pets": "read things"
+            }
+          }
+        }
+      }
+    }
   },
   "info": {
     "title": "tdd-node",
@@ -115,7 +133,11 @@
           }
         },
         "tags": ["Users"],
-        "security": [],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "parameters": [
           {
             "in": "path",
@@ -142,7 +164,11 @@
           }
         },
         "tags": ["Users"],
-        "security": [],
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "parameters": [
           {
             "in": "path",
@@ -179,7 +205,11 @@
           }
         },
         "tags": ["Users"],
-        "security": [],
+        "security": [
+          {
+            "bearer": ["admin"]
+          }
+        ],
         "parameters": [
           {
             "in": "path",
@@ -196,8 +226,8 @@
       "post": {
         "operationId": "RegisterUser",
         "responses": {
-          "200": {
-            "description": "Ok",
+          "201": {
+            "description": "Created",
             "content": {
               "application/json": {
                 "schema": {
@@ -250,6 +280,26 @@
             }
           }
         }
+      }
+    },
+    "/api/v1/users/send-email": {
+      "get": {
+        "operationId": "SendEmail",
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IHttpResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Users"],
+        "security": [],
+        "parameters": []
       }
     }
   },

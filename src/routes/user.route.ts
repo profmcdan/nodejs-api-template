@@ -51,4 +51,10 @@ userRouter.post('/login', loginValidator, inputValidationMiddleware, async (req:
   return res.send(response);
 });
 
+userRouter.post('/send-email', async (req: any, res: Response) => {
+  const userController = new UserController();
+  const response = await userController.sendEmail();
+  return res.send(response);
+});
+
 export default userRouter;

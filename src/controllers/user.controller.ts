@@ -2,24 +2,34 @@ import prisma from '../config/databases';
 import { comparePassword, createJwt, hashPassword } from '../modules/auth.module';
 import { type IHttpResponse } from '../interfaces';
 import { type ICreateUser, type ILoginUser, type IUpdateUser } from '../interfaces/user.interface';
-import { Get, Post, Put, Delete, Route, Tags, Body } from 'tsoa';
+import { Get, Post, Put, Delete, Route, Tags, Body, Path, SuccessResponse, Controller, Security } from 'tsoa';
+import { sendNewEmail } from '../queue/email.queue';
 
 @Route('api/v1/users')
 @Tags('Users')
-export default class UserController {
+export default class UserController extends Controller {
   @Get('/')
   public async getUsers(): Promise<IHttpResponse> {
+    const emailData = {
+      from: '"Fred Foo 👻" <foo@example.com>',
+      to: 'bar@example.com',
+      subject: 'Hello ✔',
+      text: 'Hello world?',
+      html: '<b>Hello world? Whats the matter with you.</b>',
+    };
+    sendNewEmail(emailData);
     const users = await prisma.user.findMany();
 
     return {
       status: 200,
       message: 'Success',
-      data: users,
+      data: { users },
     };
   }
 
   @Get('/:id')
-  public async getOneUser(id: string): Promise<IHttpResponse> {
+  @Security('bearer')
+  public async getOneUser(@Path() id: string): Promise<IHttpResponse> {
     const user = await prisma.user.findUnique({
       where: {
         id,
@@ -34,7 +44,8 @@ export default class UserController {
   }
 
   @Put('{id}')
-  public async updateUser(id: string, @Body() payload: IUpdateUser): Promise<IHttpResponse> {
+  @Security('bearer')
+  public async updateUser(@Path() id: string, @Body() payload: IUpdateUser): Promise<IHttpResponse> {
     const updated = await prisma.user.update({
       where: {
         id,
@@ -53,7 +64,8 @@ export default class UserController {
   }
 
   @Delete('/{id}')
-  public async deleteUser(id: string): Promise<IHttpResponse> {
+  @Security('bearer', ['admin'])
+  public async deleteUser(@Path() id: string): Promise<IHttpResponse> {
     const deleted = await prisma.user.delete({
       where: {
         id,
@@ -68,6 +80,7 @@ export default class UserController {
   }
 
   @Post('register')
+  @SuccessResponse('201', 'Created')
   public async registerUser(@Body() payload: ICreateUser): Promise<IHttpResponse> {
     const hashedPassword = await hashPassword(payload.password);
     const user = await prisma.user.create({
@@ -77,6 +90,8 @@ export default class UserController {
         password: hashedPassword,
       },
     });
+
+    // const job = await addJobToQueue(user);
 
     // const today = new Date();
 
@@ -94,7 +109,7 @@ export default class UserController {
     return {
       status: 201,
       message: 'Success',
-      data: user,
+      data: { user },
     };
   }
 
@@ -136,6 +151,16 @@ export default class UserController {
       status: 200,
       message: 'Success',
       data: { accessToken: createJwt(user) },
+    };
+  }
+
+  @Get('send-email')
+  public async sendEmail(): Promise<IHttpResponse> {
+    sendNewEmail({ name: 'Daniel', email: 'd@gmail.com' });
+    return {
+      status: 200,
+      message: 'Success',
+      data: null,
     };
   }
 }
