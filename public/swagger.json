@@ -6,6 +6,20 @@
     "requestBodies": {},
     "responses": {},
     "schemas": {
+      "IPagedHttpResponse": {
+        "properties": {
+          "result": {},
+          "message": {
+            "type": "string"
+          },
+          "status": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "required": ["result", "message", "status"],
+        "type": "object"
+      },
       "IHttpResponse": {
         "properties": {
           "data": {},
@@ -106,7 +120,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/IHttpResponse"
+                  "$ref": "#/components/schemas/IPagedHttpResponse"
                 }
               }
             }

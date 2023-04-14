@@ -7,5 +7,5 @@ export type IHttpResponse = {
 export type IPagedHttpResponse = {
   status: number;
   message: string;
-  data: any;
+  result: any;
 };

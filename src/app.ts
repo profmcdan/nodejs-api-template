@@ -10,6 +10,7 @@ import { emailQueue } from './queue/email.queue';
 import { createBullBoard } from '@bull-board/api';
 import { BullAdapter } from '@bull-board/api/bullAdapter';
 import { ExpressAdapter } from '@bull-board/express';
+// import { paginationMiddleware } from 'middleware';
 
 validateEnv();
 
@@ -28,6 +29,7 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(urlencoded({ extended: true }));
 app.use(express.static('public'));
+// app.use(paginationMiddleware);
 
 app.use('/admin/queues', serverAdapter.getRouter());
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(undefined, { swaggerOptions: { url: '/swagger.json' } }));
