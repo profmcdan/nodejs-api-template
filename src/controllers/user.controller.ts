@@ -1,4 +1,5 @@
 import { Get, Post, Put, Delete, Route, Tags, Body, Path, SuccessResponse, Controller, Security, Query } from 'tsoa';
+import paginator from 'prisma-paginate';
 import prisma from '../config/databases';
 import { comparePassword, createJwt, hashPassword } from '../modules/auth.module';
 import { type IPagedHttpResponse, type IHttpResponse } from '../interfaces';
@@ -24,8 +25,11 @@ export default class UserController extends Controller {
     };
     sendNewEmail(emailData);
 
+    const paginate = paginator(prisma);
+    const result = await paginate.user.paginate({ limit: Number(limit), page: Number(page), where: {} });
+
     console.log(page, limit, search, sort);
-    const result = await prisma.user.findMany();
+    // const result = await prisma.user.findMany();
 
     return {
       status: 200,

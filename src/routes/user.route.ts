@@ -8,7 +8,9 @@ const userRouter = Router();
 
 userRouter.get('/', async (req: Request, res: Response) => {
   const userController = new UserController();
-  const { page, limit, search, sort } = req.query;
+  const { search, sort } = req.query;
+  const page = req.query.page ?? 1;
+  const limit = req.query.limit ?? 10;
   const response = await userController.getUsers(Number(page), Number(limit), search?.toString(), sort?.toString());
   return res.send(response);
 });
