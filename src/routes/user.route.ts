@@ -6,9 +6,10 @@ import { inputValidationMiddleware } from '../middleware';
 
 const userRouter = Router();
 
-userRouter.get('/', async (_req: Request, res: Response) => {
+userRouter.get('/', async (req: Request, res: Response) => {
   const userController = new UserController();
-  const response = await userController.getUsers();
+  const { page, limit, search, sort } = req.query;
+  const response = await userController.getUsers(Number(page), Number(limit), search?.toString(), sort?.toString());
   return res.send(response);
 });
 

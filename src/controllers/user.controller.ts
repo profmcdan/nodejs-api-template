@@ -1,6 +1,4 @@
-import { Get, Post, Put, Delete, Route, Tags, Body, Path, SuccessResponse, Controller, Security } from 'tsoa';
-import { createPaginator } from 'prisma-pagination';
-import { type User, type Prisma } from '@prisma/client';
+import { Get, Post, Put, Delete, Route, Tags, Body, Path, SuccessResponse, Controller, Security, Query } from 'tsoa';
 import prisma from '../config/databases';
 import { comparePassword, createJwt, hashPassword } from '../modules/auth.module';
 import { type IPagedHttpResponse, type IHttpResponse } from '../interfaces';
@@ -11,7 +9,12 @@ import { sendNewEmail } from '../queue/email.queue';
 @Tags('Users')
 export default class UserController extends Controller {
   @Get('/')
-  public async getUsers(): Promise<IPagedHttpResponse> {
+  public async getUsers(
+    @Query() page?: number,
+    @Query() limit?: number,
+    @Query() search?: string,
+    @Query() sort?: string,
+  ): Promise<IPagedHttpResponse> {
     const emailData = {
       from: '"Fred Foo 👻" <foo@example.com>',
       to: 'bar@example.com',
@@ -21,8 +24,8 @@ export default class UserController extends Controller {
     };
     sendNewEmail(emailData);
 
-    const paginate = createPaginator({ perPage: 10 });
-    const result = await paginate<User, Prisma.UserFindManyArgs>(prisma.user, {});
+    console.log(page, limit, search, sort);
+    const result = await prisma.user.findMany();
 
     return {
       status: 200,
