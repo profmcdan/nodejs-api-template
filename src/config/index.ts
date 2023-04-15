@@ -9,4 +9,5 @@ export const appEnvs = {
   redisUrl: process.env.REDIS_URL ?? 'redis://localhost:6379',
   redisHost: process.env.REDIS_HOST ?? 'localhost',
   redisPort: process.env.REDIS_PORT ?? 6379,
+  kafkaUrl: process.env.KAFKA_URL ?? 'localhost:9092',
 };

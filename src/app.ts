@@ -2,15 +2,14 @@ import express, { type Application, type Response, type Request, urlencoded } fr
 import cors from 'cors';
 import morgan from 'morgan';
 import swaggerUi from 'swagger-ui-express';
+import { createBullBoard } from '@bull-board/api';
+import { BullAdapter } from '@bull-board/api/bullAdapter';
+import { ExpressAdapter } from '@bull-board/express';
 
 import validateEnv from './utils/validateEnvs';
 import redisClient from './utils/connectRedis';
 import { userRouter } from './routes';
 import { emailQueue } from './queue/email.queue';
-import { createBullBoard } from '@bull-board/api';
-import { BullAdapter } from '@bull-board/api/bullAdapter';
-import { ExpressAdapter } from '@bull-board/express';
-// import { paginationMiddleware } from 'middleware';
 
 validateEnv();
 

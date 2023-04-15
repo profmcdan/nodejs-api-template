@@ -5,6 +5,7 @@ import { comparePassword, createJwt, hashPassword } from '../modules/auth.module
 import { type IPagedHttpResponse, type IHttpResponse } from '../interfaces';
 import { type ICreateUser, type ILoginUser, type IUpdateUser } from '../interfaces/user.interface';
 import { sendNewEmail } from '../queue/email.queue';
+import kafkaProducer from '../config/kafka';
 
 @Route('api/v1/users')
 @Tags('Users')
@@ -16,15 +17,6 @@ export default class UserController extends Controller {
     @Query() search?: string,
     @Query() sort?: string,
   ): Promise<IPagedHttpResponse> {
-    const emailData = {
-      from: '"Fred Foo 👻" <foo@example.com>',
-      to: 'bar@example.com',
-      subject: 'Hello ✔',
-      text: 'Hello world?',
-      html: '<b>Hello world? Whats the matter with you.</b>',
-    };
-    sendNewEmail(emailData);
-
     const paginate = paginator(prisma);
     const result = await paginate.user.paginate({ limit: Number(limit), page: Number(page), where: {} });
 
@@ -102,20 +94,24 @@ export default class UserController extends Controller {
       },
     });
 
-    // const job = await addJobToQueue(user);
+    const emailData = {
+      from: '"Fred Foo 👻" <foo@example.com>',
+      to: user.email,
+      subject: 'Hello ✔ Welcome to our App',
+      text: `Hello ${user.name}? You have registered`,
+      html: `<b>Hello ${user.name}? You registered on ${user.createdAt.toDateString()}.</b>`,
+    };
 
-    // const today = new Date();
+    sendNewEmail(emailData);
 
-    // const token = await prisma.token.create({
-    //   data: {
-    //     userId: user.id,
-    //     value: generateRandomString(128),
-    //     expiry: new Date(today.setDate(new Date().getDate() + 7)),
-    //     category: 'SIGNUP',
-    //   },
-    // });
-
-    // TODO: Send email to set password.
+    await kafkaProducer.send({
+      topic: 'register-user-topic',
+      messages: [
+        {
+          value: 'Hello KafkaJs, A new user has been registered!',
+        },
+      ],
+    });
 
     return {
       status: 201,
@@ -167,7 +163,14 @@ export default class UserController extends Controller {
 
   @Get('send-email')
   public async sendEmail(): Promise<IHttpResponse> {
-    sendNewEmail({ name: 'Daniel', email: 'd@gmail.com' });
+    await kafkaProducer.send({
+      topic: 'hello-topic',
+      messages: [
+        {
+          value: 'Hello KafkaJs',
+        },
+      ],
+    });
     return {
       status: 200,
       message: 'Success',
