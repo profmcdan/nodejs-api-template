@@ -5,7 +5,7 @@ import { comparePassword, createJwt, hashPassword } from '../modules/auth.module
 import { type IPagedHttpResponse, type IHttpResponse } from '../interfaces';
 import { type ICreateUser, type ILoginUser, type IUpdateUser } from '../interfaces/user.interface';
 import { sendNewEmail } from '../queue/email.queue';
-import kafkaProducer from '../config/kafka';
+import kafka from '../config/kafka';
 
 @Route('api/v1/users')
 @Tags('Users')
@@ -103,15 +103,18 @@ export default class UserController extends Controller {
     };
 
     sendNewEmail(emailData);
+    const kafkaProducer = kafka.producer();
+    await kafkaProducer.connect();
 
     await kafkaProducer.send({
       topic: 'register-user-topic',
       messages: [
         {
-          value: 'Hello KafkaJs, A new user has been registered!',
+          value: `Hello KafkaJs, ${user.name} has been registered!`,
         },
       ],
     });
+    await kafkaProducer.disconnect();
 
     return {
       status: 201,
@@ -163,14 +166,6 @@ export default class UserController extends Controller {
 
   @Get('send-email')
   public async sendEmail(): Promise<IHttpResponse> {
-    await kafkaProducer.send({
-      topic: 'hello-topic',
-      messages: [
-        {
-          value: 'Hello KafkaJs',
-        },
-      ],
-    });
     return {
       status: 200,
       message: 'Success',

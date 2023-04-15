@@ -7,6 +7,7 @@ export const kafka = new Kafka({
 });
 
 const kafkaProducer = kafka.producer();
+
 kafkaProducer
   .connect()
   .then(() => {
@@ -16,4 +17,4 @@ kafkaProducer
     console.log(err);
   });
 
-export default kafkaProducer;
+export default kafka;
