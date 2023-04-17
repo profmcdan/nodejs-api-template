@@ -10,4 +10,7 @@ export const appEnvs = {
   redisHost: process.env.REDIS_HOST ?? 'localhost',
   redisPort: process.env.REDIS_PORT ?? 6379,
   kafkaUrl: process.env.KAFKA_URL ?? 'localhost:9092',
+  elasticCloudId: process.env.ELASTIC_CLOUD_ID ?? '',
+  elasticUsername: process.env.ELASTIC_USERNAME ?? '',
+  elasticPassword: process.env.ELASTIC_PASSWORD ?? '',
 };

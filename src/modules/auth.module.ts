@@ -5,7 +5,7 @@ import { appEnvs } from '../config';
 import { type NextFunction, type Response } from 'express';
 
 export const createJwt = (user: any) => {
-  return jwt.sign({ id: user.id, email: user.email }, appEnvs.jwtSecret);
+  return jwt.sign({ id: user.id, email: user.email }, appEnvs.jwtSecret, { expiresIn: '1d' });
 };
 
 export const hashPassword = async (password: string) => {

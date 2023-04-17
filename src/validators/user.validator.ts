@@ -17,3 +17,9 @@ export const updateUserValidator = [
   body('name').optional().isString().withMessage('name is required'),
   body('photo').optional().isString().withMessage('photo is required'),
 ];
+
+export const createPostValidator = [
+  body('title').optional().isString().withMessage('title is required'),
+  body('author').optional().isString().withMessage('author is required'),
+  body('content').optional().isString().withMessage('content is required'),
+];

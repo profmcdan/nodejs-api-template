@@ -8,7 +8,7 @@ import { ExpressAdapter } from '@bull-board/express';
 
 import validateEnv from './utils/validateEnvs';
 import redisClient from './utils/connectRedis';
-import { userRouter } from './routes';
+import { searchRouter, userRouter } from './routes';
 import { emailQueue } from './queue/email.queue';
 
 validateEnv();
@@ -34,6 +34,7 @@ app.use('/admin/queues', serverAdapter.getRouter());
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(undefined, { swaggerOptions: { url: '/swagger.json' } }));
 
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/search', searchRouter);
 
 app.get('/api/healthcheck', async (req: Request, res: Response) => {
   const message = await redisClient.get('try');
